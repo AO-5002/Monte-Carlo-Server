@@ -1,14 +1,15 @@
 from typing import NamedTuple
 from fastapi import UploadFile
 import pandas as pd
+import numpy as np
 
 # Main functions
 
 # Define the schema for ParseResults
 class ParseResult(NamedTuple):
-    dataframe: pd.DataFrame
-    file_size: int
-
+    tickers: np.array
+    portfolio_value: float
+    portfolio_std: float
 
 def parse_via_pandas(file: UploadFile) -> ParseResult:
 
@@ -16,8 +17,15 @@ def parse_via_pandas(file: UploadFile) -> ParseResult:
 
     if file.filename.endswith('.csv'):
         df = pd.read_csv(file.file)
-    elif file.filename.endswith(('.xlsx', '.xls')):
-        df = pd.read_excel(file.file)
+
+        tickers = df['Ticker'].to_numpy()
+        shares = df['Portfolio_Shares'].to_numpy()
+        portfolio_value = df['Portfolio_value'].to_numpy()
+
+
+
+
+
     else:
         raise Exception("File must be CSV or Excel")
 
@@ -31,15 +39,3 @@ def parse_via_pandas(file: UploadFile) -> ParseResult:
 
 
     return df
-
-
-
-def parse_via_pyspark(file: UploadFile) -> ParseResult:
-    return
-
-
-def parse_data(file: UploadFile, FILE_SIZE: int, FILE_THRESHOLD: int) -> ParseResult:
-    if(FILE_SIZE < FILE_THRESHOLD):
-        return parse_via_pandas(file)
-    else:
-        return parse_via_pyspark(file)

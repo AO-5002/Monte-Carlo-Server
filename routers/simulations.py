@@ -1,10 +1,8 @@
 from fastapi import APIRouter, UploadFile, HTTPException
 from services.File.validate import validate_file
+from services.File.pre_process import parse_via_pandas
 
 router = APIRouter()
-
-# Size threshold: 100 MB
-SIZE_THRESHOLD = 100 * 1024 * 1024  # bytes
 
 @router.post("/upload")
 async def run_var_simulation(file: UploadFile):
@@ -13,12 +11,16 @@ async def run_var_simulation(file: UploadFile):
 
     if(validate_file(file)):
 
-        # Check the size & parse the data based on its size using Pandas or PySpark
+        # Extract the tickers, portfolio value, and portfolio standard deviation
 
-        FILE_SIZE: int = file.size
+        tickers_list, portfolio_value, portfolio_std = parse_via_pandas(file)
+
+        # Once we know what our tickers are, collect historical data on those tickers that spans
+        # for 2 years via the Massive API
 
 
-        # Return the data from the simulation to visualize
 
+
+        return
     else:
         raise HTTPException(status_code=400, detail="File not valid")
